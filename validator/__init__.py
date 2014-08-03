@@ -243,6 +243,28 @@ def Required(field, dictionary):
 
     return (field in dictionary)
 
+class StopOnError(Validator):
+  """
+  Use to specify that validation on a particular
+  field should stop if first error was found
+  Will be useful in this case:
+  
+  validation = {"name": [InstanceOf(basestring), Length(5)]}
+  
+  dictionary = {"name": 5}
+  
+  In this case an exception will be raised.
+  
+  To avoid this, do it this way:
+  
+  validation = {"name": [StopOnError, InstanceOf(basestring), Length(5)]}
+  """
+  
+  def __init__(self, value): pass
+  
+  def __call__(self, value):
+    return True
+
 class InstanceOf(Validator):
     """
     Use to specify that the
@@ -573,3 +595,6 @@ def _validate_list_helper(validation, dictionary, key, errors):
                 # handling for normal validators
                 else:
                     _validate_and_store_errs(v, dictionary, key, errors)
+                    if (StopOnError in validation[key]) and errors:
+                      break
+                    
